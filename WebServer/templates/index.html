@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Cam</title>
+</head>
+<body>
+    <form method="post" action="/">
+        <button type="submit", name="action", value="toggle_pos_data">
+            {% if pos_data %}Hide{% else %}Show{% endif %}
+        </button>
+    </form>
+
+    {% if pos_data %}
+        <p>Latitude: {% block lat %}X{% endblock %}</p>
+        <p>Longitude: {% block long %}Y{% endblock %}</p>
+    {% endif %}
+
+
+</body>
+</html>
