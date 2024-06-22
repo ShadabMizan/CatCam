@@ -1,36 +1,24 @@
 #include <Arduino.h>
-#include <HardwareSerial.h>
-#include "TinyGPS++.h"
-
-// Initialize TinyGPSPlus object
-TinyGPSPlus gps;
-HardwareSerial SerialGPS(1);
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include "personal_credentials.h"
 
 void setup()
 {
-    // Start the built-in Serial port for debugging
     Serial.begin(115200);
 
-    // Start the GPS hardware serial port
-    SerialGPS.begin(9600, SERIAL_8N1, 16, 17); // Example with UART1 on GPIO16 (RX) and GPIO17 (TX)
+    Serial.print("Connecting to: "); Serial.println(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    Serial.println("GPS Module Test");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        Serial.println("Connecting...");
+        delay(1000);
+    }
+    Serial.println("Connected.");
 }
 
 void loop()
 {
-    while (SerialGPS.available() > 0) 
-    {
-        gps.encode(SerialGPS.read());
-    }
 
-    if (gps.location.isUpdated()) 
-    {
-        Serial.print("Latitude: ");
-        Serial.println(gps.location.lat(), 6);
-        Serial.print("Longitude: ");
-        Serial.println(gps.location.lng(), 6);
-    }
-
-    delay(1000);
 }
