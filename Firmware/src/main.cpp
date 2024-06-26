@@ -89,5 +89,5 @@ void loop()
     }
     
     Serial.println();
-    delay(5000);
+    delay(2000);    // Post data every 2 seconds
 }
