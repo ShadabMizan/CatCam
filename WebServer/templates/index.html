@@ -4,37 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cat Cam</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        // Initialize the map and set its view to a default location
+        let map = null;
+        let marker = null;
+        
+        function initMap() 
+        {
+            map = L.map('map').setView([0, 0], 19);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
         function fetchGPSData() 
         {
-            // JavaScript's fetch API will make a GET request to the server, as we need to GET the updated data from the Flask server
-            fetch('/gps')       
-                .then(response => response.json())      // Parse the JSON response from the server
-                .then(data =>                           // Callback function to response.json(), which is data, which contains the now parsed json object.
-                {
+            fetch('/gps')
+                .then(response => response.json())
+                .then(data => {
                     document.getElementById('satellites').textContent = data.satellites;
                     document.getElementById('latitude').textContent = data.latitude;
                     document.getElementById('longitude').textContent = data.longitude;
+
+                    // Update the map location
+                    const latLng = [data.latitude, data.longitude];
+                    if (marker) {
+                        marker.setLatLng(latLng);
+                    } else {
+                        marker = L.marker(latLng).addTo(map);
+                    }
+                    map.setView(latLng, 19);
                 })
                 .catch(error => console.error('Error fetching GPS data:', error));
         }
 
-        setInterval(fetchGPSData, 2000);
+        // Fetch GPS data every 5 seconds
+        setInterval(fetchGPSData, 5000);
+
         // Fetch GPS data immediately on page load
-        document.addEventListener('DOMContentLoaded', fetchGPSData);
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            fetchGPSData();
+        });
     </script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        .container {
+            width: 500px;
+            height: 500px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+        p {
+            margin: 10px 0px;
+        }
+    </style>
 </head>
 <body>
-    <form method="post" action="/">
-        <button type="submit" name="action" value="toggle_pos_data">
-            {% if pos_data %}Hide{% else %}Show{% endif %}
-        </button>
-    </form>
-
-    {% if pos_data %}
-        <p>Satellites: <span id="satellites">{{ satellites }}</span></p>
-        <p>Latitude: <span id="latitude">{% if lat %}{{ lat }}{% endif %}</span></p>
-        <p>Longitude: <span id="longitude">{% if lng %}{{ lng }}{% endif %}</span></p>
-    {% endif %}
+    <div class="container">
+        <div id="map"></div>
+    </div>
+    <p>Satellites: <span id="satellites"></span></p>
+    <p>Latitude: <span id="latitude"></span></p>
+    <p>Longitude: <span id="longitude"></span></p>
 </body>
 </html>

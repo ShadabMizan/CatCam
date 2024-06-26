@@ -9,17 +9,6 @@ gpsData = {'latitude': None, 'longitude': None, 'satellites': None}
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    if 'pos_data' not in session:
-        session['pos_data'] = True     
-
-    if request.method == 'POST':
-        action = request.form['action']
-        if action == 'toggle_pos_data':     
-            session['pos_data'] = not session['pos_data']
-            print("Show Position: ", session['pos_data'])
-
-        return redirect(url_for('home'))
-
     return render_template('index.html', pos_data=session['pos_data'], satellites=gpsData['satellites'], lat=gpsData['latitude'], lng=gpsData['longitude'])
 
 @app.route('/gps', methods=['GET', 'POST'])
