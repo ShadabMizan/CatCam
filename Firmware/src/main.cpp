@@ -8,6 +8,7 @@
 
 TinyGPSPlus gps;
 HardwareSerial SerialGPS(1);
+String gpsServer = "http://192.168.1.250:5000/gps";
 
 void setup()
 {
@@ -30,10 +31,6 @@ void setup()
     
 }
 
-String gpsServer = "http://192.168.1.250:5000/gps";
-float latitude = 0;
-float longitude = 0;
-int satellites = 0;
 void loop()
 {
     while (SerialGPS.available() > 0)
@@ -41,16 +38,29 @@ void loop()
         gps.encode(SerialGPS.read());
     }
     // See if we have a satellite found
-    satellites = gps.satellites.value();
+    int satellites = gps.satellites.value();
     Serial.println("Satellites found: " + String(satellites));
+
 
     if (gps.location.isUpdated())
     {
-        latitude = gps.location.lat();
-        longitude = gps.location.lng();
+        float latitude = gps.location.lat();
+        float longitude = gps.location.lng();
+
 
         Serial.println("Latitude: " + String(latitude));
         Serial.println("Longitude: " + String(longitude));
+
+        uint8_t hour;
+        uint8_t minute;
+        uint8_t second;
+
+        if (gps.time.isUpdated())
+        {
+            hour = gps.time.hour();
+            minute = gps.time.minute();
+            second = gps.time.second();
+        }
 
         // Only make HTTP requests if we are still connected to the internet
         if (WiFi.status() == WL_CONNECTED)
@@ -60,6 +70,10 @@ void loop()
             jsonDoc["latitude"] = latitude;
             jsonDoc["longitude"] = longitude;
             jsonDoc["satellites"] = satellites;
+            
+            jsonDoc["hour"] = hour;
+            jsonDoc["minute"] = minute;
+            jsonDoc["second"] = second;
 
             // Serialization into a string
             String payload;

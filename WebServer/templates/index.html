@@ -10,7 +10,7 @@
         // Initialize the map and set its view to a default location
         let map = null;
         let marker = null;
-        
+
         function initMap() 
         {
             map = L.map('map').setView([0, 0], 19);
@@ -24,9 +24,47 @@
             fetch('/gps')
                 .then(response => response.json())
                 .then(data => {
+                    // Satellite Data
                     document.getElementById('satellites').textContent = data.satellites;
                     document.getElementById('latitude').textContent = data.latitude;
                     document.getElementById('longitude').textContent = data.longitude;
+                    
+                    // Convert to AM or PM
+                    let myHour = data.hour;
+                    let myMinute = data.minute;
+                    let mySecond = data.second;
+                    if (myHour > 12)
+                    {
+                        myHour -= 12;
+                        document.getElementById('pm').textContent = "PM";
+                    } else 
+                    {
+                        document.getElementById('pm').textContent = "AM";
+                    }
+
+                    if (myHour < 10)
+                    {
+                        document.getElementById('hour').textContent = "0" + myHour;
+                    } else 
+                    {
+                        document.getElementById('hour').textContent = myHour;
+                    }
+
+                    if (myMinute < 10)
+                    {
+                        document.getElementById('minute').textContent = "0" + myMinute;
+                    } else 
+                    {
+                        document.getElementById('minute').textContent = myMinute;
+                    }
+
+                    if (mySecond < 10)
+                    {
+                        document.getElementById('second').textContent = "0" + mySecond;
+                    } else 
+                    {
+                        document.getElementById('second').textContent = mySecond;
+                    }
 
                     // Update the map location
                     const latLng = [data.latitude, data.longitude];
@@ -75,5 +113,7 @@
     <p>Satellites: <span id="satellites"></span></p>
     <p>Latitude: <span id="latitude"></span></p>
     <p>Longitude: <span id="longitude"></span></p>
+
+    <p>Last Update: <span id="hour"></span>:<span id="minute"></span>:<span id="second"></span> <span id="pm"></span></p>
 </body>
 </html>

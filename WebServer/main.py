@@ -5,11 +5,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secretKey'
 
 # GPS Data storage in memory
-gpsData = {'latitude': None, 'longitude': None, 'satellites': None}
+gpsData = {'latitude': None, 'longitude': None, 'satellites': None, 'hour': None, 'minute': None, 'second': None}
+
+# PST OFFSET 
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('index.html', pos_data=session['pos_data'], satellites=gpsData['satellites'], lat=gpsData['latitude'], lng=gpsData['longitude'])
+    return render_template('index.html')
 
 @app.route('/gps', methods=['GET', 'POST'])
 def gps():
@@ -20,7 +23,24 @@ def gps():
             gpsData['longitude'] = content['longitude']
             gpsData['satellites'] = content['satellites']
 
-            print(f"Received: latitude = {gpsData['latitude']}, longitude = {gpsData['longitude']}, satellites = {gpsData['satellites']}\n")
+            # Deal with Hour conversion between UTC to PST. UTC is 7 hours ahead of PST.
+            pstOffset = 7
+            utcTime = content['hour']
+        
+            # myHour = utcTime - pstOffset
+            myHour = None
+
+            # Causes a negative hour
+            if utcTime < pstOffset:
+                myHour = utcTime - pstOffset + 24
+            else:
+                myHour = utcTime - pstOffset
+
+            gpsData['hour'] = myHour
+            gpsData['minute'] = content['minute']
+            gpsData['second'] = content['second']
+
+            print(f"Received: latitude = {gpsData['latitude']}, longitude = {gpsData['longitude']}, satellites = {gpsData['satellites']}\nTime: {gpsData['hour']}:{gpsData['minute']}:{gpsData['second']}\n")
             return jsonify({'success': True})
         except Exception as e:
             print(f"Error receiving data: {str(e)}")
